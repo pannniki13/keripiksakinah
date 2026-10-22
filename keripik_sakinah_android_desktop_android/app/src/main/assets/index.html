@@ -1,0 +1,1554 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Keripik Sakinah - GSM UI</title>
+
+    <script>
+        // Ditambahkan oleh aplikasi desktop Electron; tidak mengubah tampilan APK Android.
+        if (new URLSearchParams(window.location.search).get('mode') === 'desktop') {
+            document.documentElement.classList.add('desktop-app');
+        }
+    </script>
+
+    <link rel="stylesheet" href="tailwind.css">
+    <link rel="stylesheet" href="vendor/fontawesome/css/fontawesome.min.css">
+    <link rel="stylesheet" href="vendor/fontawesome/css/solid.min.css">
+
+    <style>
+        body {
+            background: radial-gradient(circle at 10% 5%, #fff4d9 0, #f4eee2 35%, #edf0f3 100%);
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Menyembunyikan scrollbar tapi tetap bisa di-scroll */
+        .hide-scroll::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scroll {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        .glass-nav {
+            background: rgba(255, 251, 242, 0.76);
+            -webkit-backdrop-filter: saturate(125%) blur(12px);
+            backdrop-filter: saturate(125%) blur(12px);
+            border-color: rgba(255,255,255,.72);
+            box-shadow: 0 -8px 28px rgba(74,53,21,.08);
+        }
+        .ios-glass {
+            background: rgba(255, 255, 255, .62);
+            -webkit-backdrop-filter: saturate(125%) blur(10px);
+            backdrop-filter: saturate(125%) blur(10px);
+            border: 1px solid rgba(255,255,255,.82);
+            box-shadow: 0 10px 30px rgba(74,53,21,.07), inset 0 1px 0 rgba(255,255,255,.55);
+        }
+        .glass-cart-card {
+            background: rgba(255,255,255,.68);
+            -webkit-backdrop-filter: blur(10px) saturate(125%);
+            backdrop-filter: blur(10px) saturate(125%);
+            border: 1px solid rgba(255,255,255,.88);
+            box-shadow: 0 8px 24px rgba(83,60,24,.065), inset 0 1px 0 rgba(255,255,255,.78);
+        }
+        .glass-cart-summary {
+            background: linear-gradient(135deg, rgba(111,80,32,.94), rgba(74,53,21,.91));
+            -webkit-backdrop-filter: blur(12px);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,.18);
+            box-shadow: 0 15px 35px rgba(74,53,21,.16);
+        }
+        .glass-cart-footer {
+            background: rgba(255, 251, 243, .82);
+            -webkit-backdrop-filter: saturate(125%) blur(12px);
+            backdrop-filter: saturate(125%) blur(12px);
+            border-top: 1px solid rgba(255,255,255,.92);
+            box-shadow: 0 -8px 30px rgba(74,53,21,.08);
+            padding-bottom: max(16px, env(safe-area-inset-bottom));
+        }
+        .cart-scroll-region {
+            min-height: 0;
+            overflow-y: auto;
+            overflow-x: hidden;
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior-y: contain;
+            touch-action: pan-y;
+            scrollbar-width: none;
+        }
+        .cart-scroll-region::-webkit-scrollbar { display: none; }
+        .nav-active { color: #6F5020 !important; }
+        .nav-active i { filter: drop-shadow(0 2px 5px rgba(252,181,57,.45)); }
+        #activeScreen2 > div:last-child {
+            background: rgba(255, 252, 246, .84) !important;
+            -webkit-backdrop-filter: saturate(125%) blur(12px);
+            backdrop-filter: saturate(125%) blur(12px);
+            border-color: rgba(255,255,255,.9) !important;
+        }
+        #activeScreen4 .rounded-\[24px\] {
+            -webkit-backdrop-filter: blur(9px) saturate(120%);
+            backdrop-filter: blur(9px) saturate(120%);
+        }
+        .image-fallback::after {
+            content: '🥨';
+            font-size: 2.4rem;
+            display: grid;
+            place-items: center;
+            width: 100%; height: 100%;
+        }
+
+        .smooth-transition {
+            transition: transform 0.18s ease, opacity 0.18s ease, background-color 0.18s ease, box-shadow 0.18s ease;
+        }
+
+        /* Ikon gradient + glass ringan */
+        .icon-glass {
+            display: inline-grid;
+            place-items: center;
+            background: linear-gradient(145deg, rgba(255,255,255,.86), rgba(255,244,214,.46));
+            border: 1px solid rgba(255,255,255,.88);
+            box-shadow: 0 4px 12px rgba(111,80,32,.09), inset 0 1px 0 rgba(255,255,255,.8);
+            -webkit-backdrop-filter: blur(8px) saturate(120%);
+            backdrop-filter: blur(8px) saturate(120%);
+        }
+        .icon-gradient {
+            background: linear-gradient(135deg, #9B641E 0%, #F6BC48 48%, #E77722 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent !important;
+            -webkit-text-fill-color: transparent;
+        }
+        .cat-btn:not(.active) i,
+        .bottom-nav-item > i,
+        .ios-glass > i,
+        #activeScreen1 button[aria-label] > i,
+        #activeScreen1 .rounded-\[22px\] > i,
+        #homeProductGrid .fa-cart-plus,
+        #activeScreen2 .absolute.top-12 button:not(#detailFavBtn) i,
+        #activeScreen3 .glass-cart-card .w-9 i {
+            background: linear-gradient(135deg, #A36C25 0%, #F6BC48 48%, #E77722 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            -webkit-text-fill-color: transparent;
+        }
+        @supports not ((backdrop-filter: blur(1px))) {
+            .glass-nav, .ios-glass, .glass-cart-card, .glass-cart-footer, .icon-glass {
+                background-color: rgba(255, 251, 242, .96);
+            }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .smooth-transition, .wobble-logo { animation: none !important; transition: none !important; }
+        }
+
+        /* Pada Android/layar kecil, tampilkan aplikasi penuh; frame hanya untuk preview desktop. */
+        html { min-height: 100%; }
+        @media (max-width: 600px) {
+            html, body { width: 100%; height: 100%; min-height: 100%; overflow: hidden; }
+            body { display: block !important; padding: 0 !important; margin: 0; background: #FBF8F1; }
+            #prototypeHeader { display: none !important; }
+            #devicePreview {
+                width: 100% !important;
+                max-width: none !important;
+                height: 100vh !important;
+                height: 100dvh !important;
+                min-height: 100% !important;
+                border: 0 !important;
+                border-radius: 0 !important;
+                box-shadow: none !important;
+            }
+            #devicePreview > div.absolute.top-0 { display: none !important; }
+            #activeScreen1 > div.bg-gradient-to-br { padding-top: max(16px, env(safe-area-inset-top)) !important; }
+            #activeScreen2 .absolute.top-12 { top: max(16px, env(safe-area-inset-top)) !important; }
+            #activeScreen2 > div:last-child { border-radius: 0 !important; }
+            #activeScreen3 > div:first-child,
+            #activeScreen4 > div:first-child,
+            #activeScreen5 > div:first-child,
+            #activeScreen7 > div:first-child,
+            #activeScreen8 > div:first-child { padding-top: max(16px, env(safe-area-inset-top)) !important; }
+            #activeScreen6 { padding-top: max(20px, env(safe-area-inset-top)) !important; }
+            #bottomNavigation { border-radius: 0 !important; padding-bottom: max(12px, env(safe-area-inset-bottom)) !important; }
+            .glass-nav, .glass-cart-footer { border-radius: 0 !important; }
+        }
+
+        /* Override input radio color */
+        input[type="radio"] {
+            accent-color: #6F5020;
+        }
+        
+        /* Animasi khusus logo GSM */
+        .wobble-logo {
+            animation: wobble 3s ease-in-out infinite;
+        }
+        
+        @keyframes wobble {
+            0%, 100% { transform: rotate(-3deg); }
+            50% { transform: rotate(3deg); }
+        }
+
+
+        /* Mode aplikasi desktop (Electron/Windows/macOS/Linux). */
+        html.desktop-app, html.desktop-app body {
+            width: 100%; height: 100%; min-height: 100%; overflow: hidden;
+        }
+        html.desktop-app body {
+            display: block !important; margin: 0 !important; padding: 0 !important;
+            background: #f3eee5; user-select: auto;
+        }
+        html.desktop-app #prototypeHeader { display: none !important; }
+        html.desktop-app #devicePreview {
+            width: 100vw !important; max-width: none !important;
+            height: 100vh !important; min-height: 0 !important;
+            border: 0 !important; border-radius: 0 !important; box-shadow: none !important;
+        }
+        html.desktop-app #devicePreview > div.absolute.top-0 { display: none !important; }
+        html.desktop-app #mainAppContent {
+            width: 100%; height: 100%; border-radius: 0; background: #fbf8f1;
+        }
+        html.desktop-app #activeScreen1,
+        html.desktop-app #activeScreen2,
+        html.desktop-app #activeScreen3,
+        html.desktop-app #activeScreen4,
+        html.desktop-app #activeScreen5,
+        html.desktop-app #activeScreen6,
+        html.desktop-app #activeScreen7,
+        html.desktop-app #activeScreen8 {
+            left: 88px !important; width: calc(100% - 88px) !important;
+        }
+        html.desktop-app #bottomNavigation {
+            top: 0 !important; bottom: 0 !important; left: 0 !important; right: auto !important;
+            width: 88px !important; box-sizing: border-box;
+            flex-direction: column !important; justify-content: flex-start !important;
+            align-items: stretch !important; gap: 14px !important;
+            padding: 28px 12px !important;
+            border-top: 0 !important; border-right: 1px solid rgba(111,80,32,.12) !important;
+            border-radius: 0 !important;
+            background: rgba(255,251,242,.94) !important;
+            box-shadow: 5px 0 22px rgba(74,53,21,.06) !important;
+            -webkit-backdrop-filter: none !important; backdrop-filter: none !important;
+        }
+        html.desktop-app #bottomNavigation .bottom-nav-item {
+            min-height: 62px; width: 100%; flex: 0 0 auto; position: relative;
+            border: 1px solid rgba(255,255,255,.88); border-radius: 17px;
+            justify-content: center; gap: 6px; background: rgba(255,255,255,.62);
+            color: #80602d;
+        }
+        html.desktop-app #bottomNavigation .bottom-nav-item i { font-size: 19px !important; }
+        html.desktop-app #bottomNavigation .bottom-nav-item::after {
+            display: block; font-size: 9px; font-weight: 800; line-height: 1;
+            color: #80602d;
+        }
+        html.desktop-app #bottomNavigation .bottom-nav-item:nth-child(1)::after { content: 'Beranda'; }
+        html.desktop-app #bottomNavigation .bottom-nav-item:nth-child(2)::after { content: 'Favorit'; }
+        html.desktop-app #bottomNavigation .bottom-nav-item:nth-child(3)::after { content: 'Keranjang'; }
+        html.desktop-app #bottomNavigation .bottom-nav-item:nth-child(4)::after { content: 'Profil'; }
+        html.desktop-app #bottomNavigation .bottom-nav-item.nav-active {
+            background: linear-gradient(145deg, rgba(255,230,160,.95), rgba(255,255,255,.9)) !important;
+            border-color: rgba(246,188,72,.65) !important;
+            box-shadow: 0 5px 16px rgba(111,80,32,.10);
+        }
+        html.desktop-app #bottomNavigation .nav-dot {
+            position: absolute; top: 7px; right: 7px; margin: 0 !important;
+        }
+        html.desktop-app #activeScreen1 > div.bg-gradient-to-br {
+            padding: 27px 32px 24px !important; border-radius: 0 0 28px 28px !important;
+            box-shadow: 0 8px 24px rgba(111,80,32,.10) !important;
+        }
+        html.desktop-app #activeScreen1 > div.bg-gradient-to-br > div:nth-child(2) { margin-top: 14px !important; }
+        html.desktop-app #activeScreen1 > div.bg-gradient-to-br > div:nth-child(2) h3 { font-size: 25px !important; }
+        html.desktop-app #activeScreen1 .mt-4.bg-white\/72 { max-width: 740px; }
+        html.desktop-app #activeScreen1 > div.flex-1.min-h-0.overflow-y-auto {
+            padding-top: 22px !important; padding-bottom: 22px !important;
+        }
+        html.desktop-app #activeScreen1 .px-5 { padding-left: 30px !important; padding-right: 30px !important; }
+        html.desktop-app #activeScreen1 .mx-5 { margin-left: 30px !important; margin-right: 30px !important; }
+        html.desktop-app #activeScreen1 .mx-5.mt-3.mb-5 { height: 174px !important; }
+        html.desktop-app #homeProductGrid { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; gap: 16px !important; }
+        html.desktop-app #homeProductGrid > * { min-width: 0; }
+        html.desktop-app #activeScreen2 .absolute.top-12 { top: 22px !important; }
+        html.desktop-app #activeScreen3 > div:first-child { padding-top: 24px !important; }
+        html.desktop-app #activeScreen3 #cartScrollBody { padding-left: 30px !important; padding-right: 30px !important; }
+        html.desktop-app #activeScreen3 .glass-cart-footer { padding-bottom: 18px !important; }
+        html.desktop-app #aiChatFab { right: 28px !important; bottom: 26px !important; }
+        html.desktop-app #aiChatWindow { right: 28px !important; bottom: 96px !important; }
+        html.desktop-app input, html.desktop-app textarea, html.desktop-app button {
+            -webkit-app-region: no-drag;
+        }
+        @media (max-width: 1150px) {
+            html.desktop-app #homeProductGrid { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+        }
+        @media (max-height: 720px) {
+            html.desktop-app #activeScreen1 > div.bg-gradient-to-br { padding-top: 18px !important; padding-bottom: 16px !important; }
+            html.desktop-app #activeScreen1 > div.bg-gradient-to-br > div:nth-child(2) { margin-top: 8px !important; }
+            html.desktop-app #activeScreen1 > div.bg-gradient-to-br > div:nth-child(2) h3 { font-size: 21px !important; }
+        }\n    </style>
+    <!-- UI glassmorphism, cart swipe-scroll, and product-specific reference photos -->
+</head>
+<body class="min-h-screen text-gray-800 flex flex-col items-center p-4 sm:p-8">
+
+    <div id="prototypeHeader" class="max-w-4xl w-full bg-white rounded-2xl shadow-sm p-4 mb-8 flex flex-col md:flex-row items-center justify-between gap-4 border border-gray-100">
+        <div>
+            <h1 class="font-display font-bold text-xl text-brand-brown">Prototype: Keripik Sakinah</h1>
+            <p class="text-sm text-gray-500">GSM UI Update - Tanpa Login & Kategori Swipeable</p>
+        </div>
+        <div class="flex gap-2">
+            <button onclick="triggerSplashScreen()" class="px-4 py-2 bg-brand-light hover:bg-yellow-100 text-brand-brown rounded-xl text-sm font-semibold smooth-transition flex items-center gap-2 border border-brand-yellow">
+                <i class="fa-solid fa-rotate-right"></i> Restart
+            </button>
+        </div>
+    </div>
+
+    <div id="devicePreview" class="w-[375px] h-[812px] bg-white rounded-[45px] shadow-[0_20px_50px_rgba(111,80,32,0.15)] border-[8px] border-gray-900 relative overflow-hidden flex flex-col">
+        
+        <!-- iPhone Notch Area -->
+        <div class="absolute top-0 inset-x-0 h-6 flex justify-center z-50">
+            <div class="w-32 h-6 bg-gray-900 rounded-b-3xl"></div>
+        </div>
+
+        <!-- Notification Toast -->
+        <div id="toast" class="absolute top-10 inset-x-4 z-[100] transform -translate-y-20 opacity-0 smooth-transition bg-brand-brown/95 backdrop-blur text-white px-4 py-3 rounded-2xl shadow-lg flex items-start gap-3 border border-brand-yellow/30">
+            <i class="fa-solid fa-circle-check mt-0.5 text-brand-yellow"></i>
+            <div>
+                <div id="toastTitle" class="font-semibold text-sm">Notifikasi</div>
+                <div id="toastMessage" class="text-xs text-brand-light mt-0.5">Pesan simulasi...</div>
+            </div>
+        </div>
+
+        <!-- ================= OVERLAYS ================= -->
+        
+        <div id="splashOverlay" class="absolute inset-0 bg-gradient-to-br from-[#FFE082] via-[#FCB539] to-[#F57C00] z-[60] flex flex-col items-center justify-center hidden">
+            <div class="w-32 h-32 bg-white/95 backdrop-blur-md rounded-full flex items-center justify-center shadow-2xl mb-6 wobble-logo border-4 border-brand-brown">
+                <!-- Representasi logo typograhic badge Keripik Sakinah -->
+                <div class="text-center font-display font-extrabold text-brand-brown leading-none">
+                    <span class="text-3xl block -mb-1">KS</span>
+                </div>
+            </div>
+            <h2 class="font-display font-extrabold text-2xl text-brand-dark drop-shadow-sm">Keluarga Sakinah</h2>
+            <p class="text-brand-brown font-extrabold text-sm mt-1 bg-white/50 backdrop-blur-sm px-4 py-1 rounded-full shadow-sm">Otentik & Renyah</p>
+        </div>
+
+        <!-- ================= APP SCREENS ================= -->
+        <div id="mainAppContent" class="flex-1 flex flex-col h-full bg-gray-50 relative overflow-hidden">
+            
+            <div id="activeScreen1" class="absolute inset-0 flex flex-col smooth-transition bg-[#FBF8F1]">
+                <!-- Header -->
+                <div class="bg-gradient-to-br from-[#FFE39A] via-[#FCB539] to-[#EE8A24] pt-14 pb-5 px-5 rounded-b-[34px] shadow-lg relative z-20 shrink-0 border-b border-white/35">
+                    <div class="flex justify-between items-center gap-3">
+                        <div class="flex items-center gap-3 min-w-0">
+                            <div class="w-11 h-11 rounded-2xl bg-white/60 backdrop-blur-xl border border-white/70 shadow-sm flex items-center justify-center shrink-0">
+                                <span class="font-display font-extrabold text-brand-brown text-sm">KS</span>
+                            </div>
+                            <div class="min-w-0">
+                                <p class="text-[10px] text-brand-brown/80 font-extrabold uppercase tracking-[.18em]">Keripik rumahan</p>
+                                <h2 class="font-display font-extrabold text-xl leading-tight text-brand-dark">Keripik Sakinah</h2>
+                            </div>
+                        </div>
+                        <button onclick="showToast('Notifikasi','Belum ada notifikasi baru, rek!')" aria-label="Notifikasi" class="w-10 h-10 bg-white/35 hover:bg-white/55 backdrop-blur-xl rounded-full flex items-center justify-center smooth-transition border border-white/60 text-brand-dark shadow-sm relative shrink-0">
+                            <i class="fa-solid fa-bell"></i><span class="absolute top-2 right-2 w-2 h-2 bg-red-500 border border-white rounded-full"></span>
+                        </button>
+                    </div>
+                    <div class="mt-4 flex items-end justify-between gap-3">
+                        <div>
+                            <p class="text-xs text-brand-brown/90 font-semibold">Halo, Sahabat Sakinah 👋</p>
+                            <h3 class="font-display font-extrabold text-[21px] leading-tight mt-1 text-brand-dark">Cemilan enak,<br>buat hari makin baik.</h3>
+                        </div>
+                        <div class="w-[94px] h-[80px] rounded-[22px] bg-white/40 border border-white/60 backdrop-blur-md flex items-center justify-center shadow-sm rotate-3 shrink-0">
+                            <i class="fa-solid fa-cookie-bite text-[42px] text-brand-brown drop-shadow-sm"></i>
+                        </div>
+                    </div>
+                    <!-- Search bar -->
+                    <div class="mt-4 bg-white/72 backdrop-blur-2xl rounded-2xl shadow-[0_7px_22px_rgba(89,61,18,.10)] flex items-center px-4 py-3 border border-white/80">
+                        <i class="fa-solid fa-magnifying-glass text-brand-brown text-sm"></i>
+                        <input type="text" id="searchInput" oninput="handleSearch()" placeholder="Cari keripik pisang atau talas..." class="flex-1 bg-transparent border-none focus:outline-none text-sm text-brand-dark ml-3 placeholder-brand-brown/55 font-medium min-w-0">
+                        <button type="button" title="Bersihkan pencarian" aria-label="Bersihkan pencarian" onclick="document.getElementById('searchInput').value=''; handleSearch();" class="text-brand-brown/55 hover:text-brand-brown ml-2"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                </div>
+
+                <!-- Main home scroll region -->
+                <div class="flex-1 min-h-0 overflow-y-auto hide-scroll pb-24 relative z-10 -mt-3 pt-5" style="-webkit-overflow-scrolling:touch; overscroll-behavior-y:contain; touch-action:pan-y;">
+                    <div class="px-5">
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="font-display font-extrabold text-base text-brand-dark">Kategori Pilihan</h3>
+                            <span class="text-[10px] font-bold text-brand-brown/55">GESER →</span>
+                        </div>
+                        <div class="flex gap-2.5 overflow-x-auto pb-2 hide-scroll" id="categoryButtons" style="-webkit-overflow-scrolling:touch; touch-action:pan-x; overscroll-behavior-x:contain;">
+                            <button onclick="filterCategory('Semua', this)" class="cat-btn active px-4 py-2.5 bg-brand-brown text-white rounded-full text-xs font-bold shadow-md flex items-center gap-2 whitespace-nowrap shrink-0 smooth-transition border border-brand-brown"><span class="w-2 h-2 rounded-full bg-brand-yellow cat-dot"></span><i class="fa-solid fa-border-all"></i> Semua</button>
+                            <button onclick="filterCategory('Talas', this)" class="cat-btn px-4 py-2.5 bg-white/75 backdrop-blur-xl text-brand-brown rounded-full text-xs font-bold border border-white/80 whitespace-nowrap shrink-0 shadow-sm smooth-transition"><i class="fa-solid fa-cookie-bite"></i> Talas</button>
+                            <button onclick="filterCategory('Pisang', this)" class="cat-btn px-4 py-2.5 bg-white/75 backdrop-blur-xl text-brand-brown rounded-full text-xs font-bold border border-white/80 whitespace-nowrap shrink-0 shadow-sm smooth-transition"><i class="fa-solid fa-leaf"></i> Pisang</button>
+                            <button onclick="filterCategory('Minuman', this)" class="cat-btn px-4 py-2.5 bg-white/75 backdrop-blur-xl text-brand-brown rounded-full text-xs font-bold border border-white/80 whitespace-nowrap shrink-0 shadow-sm smooth-transition"><i class="fa-solid fa-glass-water"></i> Minuman</button>
+                            <button onclick="filterCategory('Camilan', this)" class="cat-btn px-4 py-2.5 bg-white/75 backdrop-blur-xl text-brand-brown rounded-full text-xs font-bold border border-white/80 whitespace-nowrap shrink-0 shadow-sm smooth-transition"><i class="fa-solid fa-bowl-food"></i> Camilan</button>
+                            <button onclick="filterCategory('Lainnya', this)" class="cat-btn px-4 py-2.5 bg-white/75 backdrop-blur-xl text-brand-brown rounded-full text-xs font-bold border border-white/80 whitespace-nowrap shrink-0 shadow-sm smooth-transition"><i class="fa-solid fa-ellipsis"></i> Lainnya</button>
+                        </div>
+                    </div>
+
+                    <div class="mx-5 mt-3 mb-5 rounded-[26px] overflow-hidden relative h-36 shadow-[0_12px_28px_rgba(111,80,32,.18)] border border-white/70">
+                        <img src="https://awsimages.detik.net.id/community/media/visual/2024/06/22/keripik-pisang-kekinian-3.jpeg?q=90&amp;w=700" alt="Keripik pisang keemasan" loading="lazy" decoding="async" referrerpolicy="no-referrer" class="absolute inset-0 w-full h-full object-cover" onerror="this.style.display='none';this.parentElement.classList.add('bg-gradient-to-br','from-[#9B6320]','to-[#4A3515]')">
+                        <div class="absolute inset-0 bg-gradient-to-r from-[#42290F]/90 via-[#5C3512]/62 to-transparent"></div>
+                        <div class="absolute inset-0 p-4 flex flex-col justify-center items-start">
+                            <span class="text-[9px] tracking-[.18em] font-extrabold text-brand-yellow uppercase">Otentik & Renyah</span>
+                            <h3 class="font-display text-white font-extrabold text-xl leading-tight mt-1 drop-shadow">Teman santai<br>setiap saat.</h3>
+                            <button onclick="filterCategory('Semua', document.querySelector('.cat-btn'))" class="mt-2 bg-white/90 text-brand-brown px-3 py-1.5 rounded-full text-[10px] font-extrabold shadow-sm">Lihat produk <i class="fa-solid fa-arrow-right ml-1"></i></button>
+                        </div>
+                    </div>
+
+                    <div class="px-5">
+                        <div class="flex items-end justify-between mb-3 gap-3">
+                            <div>
+                                <p class="text-[10px] uppercase tracking-[.16em] font-extrabold text-orange-600">Pilihan buat kamu</p>
+                                <h3 id="productGridTitle" class="font-display font-extrabold text-lg text-brand-dark mt-0.5">Produk Unggulan</h3>
+                            </div>
+                            <span id="productCountLabel" class="text-[10px] font-semibold text-brand-brown/55 whitespace-nowrap">7 produk</span>
+                        </div>
+                        <div id="homeProductGrid" class="grid grid-cols-2 gap-3 pb-4"></div>
+                        <div class="grid grid-cols-3 gap-2 mt-1 mb-4">
+                            <div class="ios-glass rounded-2xl py-3 px-2 text-center"><i class="fa-solid fa-leaf text-green-700 text-sm"></i><p class="text-[9px] font-bold text-brand-brown mt-1">Bahan pilihan</p></div>
+                            <div class="ios-glass rounded-2xl py-3 px-2 text-center"><i class="fa-solid fa-cookie-bite text-orange-600 text-sm"></i><p class="text-[9px] font-bold text-brand-brown mt-1">Renyah gurih</p></div>
+                            <div class="ios-glass rounded-2xl py-3 px-2 text-center"><i class="fa-solid fa-heart text-red-500 text-sm"></i><p class="text-[9px] font-bold text-brand-brown mt-1">Dibuat sepenuh hati</p></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LAYAR 2: DETAIL PRODUK (INTERAKTIF & SCROLLABLE) -->
+            <div id="activeScreen2" class="absolute inset-0 bg-white hidden flex-col z-30 overflow-hidden">
+                <!-- Image Header Area -->
+                <div class="h-[38%] bg-brand-light relative shrink-0">
+                    <img id="detailImg" src="https://www.static-src.com/wcsstore/Indraprastha/images/catalog/full/catalog-image/110/MTA-170699257/krilazz_krilazz_keripik_talas_pedas_manis_80_gr_full01_c9873ba0.jpg" decoding="async" class="w-full h-full object-cover" alt="Product Detail">
+                    <!-- Top Actions -->
+                    <div class="absolute top-12 inset-x-5 flex justify-between z-10">
+                        <button onclick="setInteractiveScreen(1)" class="w-10 h-10 bg-white/90 backdrop-blur rounded-full flex items-center justify-center text-brand-brown shadow-md hover:scale-105 smooth-transition">
+                            <i class="fa-solid fa-chevron-left"></i>
+                        </button>
+                        <button onclick="toggleFavoriteDetail(this)" id="detailFavBtn" class="w-10 h-10 bg-white/90 backdrop-blur rounded-full flex items-center justify-center text-gray-400 shadow-md hover:scale-105 smooth-transition">
+                            <i class="fa-solid fa-heart"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Scrollable Detail Content -->
+                <div class="flex-1 bg-white -mt-6 rounded-t-[35px] relative z-20 shadow-[0_-10px_20px_rgba(0,0,0,0.06)] overflow-y-auto hide-scroll pb-28">
+                    <div class="p-5 space-y-5">
+                        <div class="w-12 h-1.5 bg-gray-200 rounded-full mx-auto -mt-1"></div>
+                        
+                        <div class="flex justify-between items-start">
+                            <div class="w-2/3">
+                                <span id="detailCategoryBadge" class="text-[10px] font-bold text-orange-600 bg-orange-50 border border-orange-200 px-2 py-0.5 rounded-md uppercase tracking-wider">Talas</span>
+                                <h2 class="font-display font-extrabold text-xl text-brand-dark leading-tight mt-1" id="detailTitle">Keripik Talas Sakinah</h2>
+                            </div>
+                            <div class="text-right shrink-0" id="detailSocialProof">
+                                <div class="flex items-center justify-end gap-1 mb-0.5">
+                                    <i class="fa-solid fa-star text-brand-yellow text-sm"></i>
+                                    <span class="text-sm font-extrabold text-brand-dark" id="detailRating">4.9</span>
+                                </div>
+                                <span class="text-[10px] text-brand-brown font-bold bg-brand-light border border-brand-yellow/30 px-2 py-0.5 rounded-md" id="detailSold">Terjual 1k+</span>
+                            </div>
+                        </div>
+                        
+                        <p class="text-xs text-gray-500 leading-relaxed font-medium" id="detailDesc">Keripik talas renyah dengan bumbu pilihan, diproduksi fresh langsung dari hasil panen kebun Keluarga Sakinah. Cita rasa otentik khas Malang.</p>
+
+                        <!-- Sizes Selection -->
+                        <div>
+                            <div class="flex justify-between items-center mb-2.5">
+                                <h4 class="font-extrabold text-xs text-brand-dark uppercase tracking-wider">1. Pilih Ukuran Kemasan</h4>
+                                <span class="text-[10px] font-bold text-orange-600" id="selectedSizeLabel">200g</span>
+                            </div>
+                            <div class="grid grid-cols-4 gap-2" id="detailSizeContainer">
+                                <!-- Populated dynamically -->
+                            </div>
+                        </div>
+
+                        <!-- Flavors Selection -->
+                        <div>
+                            <div class="flex justify-between items-center mb-2.5">
+                                <h4 class="font-extrabold text-xs text-brand-dark uppercase tracking-wider">2. Pilih Varian Rasa</h4>
+                                <span class="text-[10px] font-bold text-orange-600" id="selectedFlavorLabel">Pedas Manis</span>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2" id="detailFlavorContainer">
+                                <!-- Populated dynamically -->
+                            </div>
+                        </div>
+
+                        <!-- Quality Guarantee Badge -->
+                        <div class="bg-brand-light/50 p-4 rounded-2xl border border-brand-yellow/30 space-y-2">
+                            <h4 class="font-extrabold text-xs text-brand-dark uppercase flex items-center gap-2">
+                                <i class="fa-solid fa-shield-halved text-brand-yellow text-sm"></i> Jaminan Kualitas Sakinah
+                            </h4>
+                            <ul class="text-[11px] text-brand-brown space-y-1 font-medium pl-1">
+                                <li class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-green-600 text-[10px]"></i> 100% Hasil Panen Kebun Sendiri</li>
+                                <li class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-green-600 text-[10px]"></i> Bebas Pengawet Buatan & Terdaftar P-IRT</li>
+                                <li class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-green-600 text-[10px]"></i> Kemasan Standing Pouch Zipper Kedap Udara</li>
+                            </ul>
+                        </div>
+
+                        <!-- Reviews Snippet -->
+                        <div class="border-t border-gray-100 pt-3">
+                            <h4 class="font-extrabold text-xs text-brand-dark uppercase mb-2">Ulasan Pembeli Teratas</h4>
+                            <div class="bg-gray-50 p-3 rounded-xl text-xs space-y-1 border border-gray-100">
+                                <div class="flex justify-between font-bold text-brand-dark">
+                                    <span>Andi Setiawan (Malang)</span>
+                                    <span class="text-brand-yellow">★★★★★</span>
+                                </div>
+                                <p class="text-[11px] text-gray-500 font-medium">"Renyahnya pas banget, ga bikin gusi sakit. Bumbu rasanya melimpah dan gurih alami!"</p>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Bottom Add to Cart Bar -->
+                <div class="absolute bottom-0 inset-x-0 bg-white border-t border-gray-100 px-5 py-3.5 flex items-center justify-between gap-3 z-40 shadow-[0_-10px_20px_rgba(0,0,0,0.06)] rounded-b-[45px]">
+                    <div class="flex items-center gap-3 bg-brand-light rounded-2xl px-2 py-1 border border-brand-yellow/30">
+                        <button onclick="updateQty(-1)" class="w-9 h-9 rounded-xl bg-white shadow-sm flex items-center justify-center font-bold text-brand-brown text-base hover:bg-yellow-50 smooth-transition">-</button>
+                        <span id="detailQty" class="font-extrabold text-sm w-4 text-center text-brand-dark">1</span>
+                        <button onclick="updateQty(1)" class="w-9 h-9 rounded-xl bg-brand-yellow shadow-sm flex items-center justify-center font-bold text-brand-brown text-base hover:bg-yellow-400 smooth-transition">+</button>
+                    </div>
+                    <button onclick="addToCartAndNavigate()" class="flex-1 bg-gradient-to-r from-brand-brown to-brand-dark text-white rounded-2xl py-3.5 px-5 flex items-center justify-between shadow-lg hover:shadow-xl hover:scale-[1.01] smooth-transition active:scale-95">
+                        <span class="font-extrabold text-xs uppercase tracking-wider flex items-center gap-1.5"><i class="fa-solid fa-cart-plus text-sm"></i> Tambah Keranjang</span>
+                        <span id="detailTotalPrice" class="font-extrabold text-sm text-brand-yellow">Rp 15.000</span>
+                    </button>
+                </div>
+            </div>
+
+
+            <div id="activeScreen3" class="absolute inset-0 bg-[#F7F2E8] hidden flex-col z-30 overflow-hidden">
+                <!-- Fixed glass header -->
+                <div class="px-5 pt-12 pb-4 glass-nav flex items-center justify-between z-30 shrink-0 rounded-b-[26px] border-b">
+                    <button onclick="setInteractiveScreen(1)" aria-label="Kembali ke beranda" class="w-10 h-10 bg-white/65 backdrop-blur-xl rounded-full flex items-center justify-center text-brand-brown border border-white shadow-sm active:scale-95 smooth-transition">
+                        <i class="fa-solid fa-chevron-left"></i>
+                    </button>
+                    <div class="text-center">
+                        <h2 class="font-display font-extrabold text-xl text-brand-dark">Keranjang</h2>
+                        <p class="text-[10px] text-brand-brown/65 font-semibold mt-0.5">Cek lagi camilan pilihanmu</p>
+                    </div>
+                    <button onclick="clearCart()" class="text-[10px] font-extrabold text-red-500 bg-red-50/85 px-3 py-2 rounded-xl border border-red-100/80 active:scale-95 smooth-transition">Kosongkan</button>
+                </div>
+
+                <!-- Natural touch scrolling: swipe through all cart sections -->
+                <div id="cartScrollBody" class="cart-scroll-region flex-1 px-5 pt-4 pb-5">
+                    <div class="flex items-center justify-between mb-3 px-1">
+                        <h3 class="font-display font-extrabold text-sm text-brand-dark">Item pilihanmu</h3>
+                        <span id="cartItemCountLabel" class="text-[10px] font-bold text-brand-brown/60 bg-white/70 border border-white rounded-full px-3 py-1">3 item</span>
+                    </div>
+                    <div id="cartItemsList" class="space-y-3">
+                        <!-- Dynamic items rendered by JavaScript -->
+                    </div>
+
+                    <div class="mt-5 glass-cart-card p-4 rounded-[24px]">
+                        <div class="flex items-center gap-2 mb-3">
+                            <div class="w-9 h-9 rounded-xl bg-brand-yellow/25 text-brand-brown flex items-center justify-center border border-white"><i class="fa-solid fa-ticket"></i></div>
+                            <div><h4 class="font-extrabold text-xs text-brand-dark">Voucher spesial</h4><p class="text-[10px] text-brand-brown/60 mt-0.5">Masukkan kode promo kamu</p></div>
+                        </div>
+                        <div class="flex gap-2">
+                            <div class="flex-1 flex items-center bg-white/65 border border-white rounded-xl px-3 min-w-0 shadow-inner">
+                                <i class="fa-solid fa-tag text-brand-brown/55 text-sm"></i>
+                                <input type="text" id="promoInput" placeholder="KODE PROMO" aria-label="Kode promo" class="bg-transparent border-none focus:outline-none text-xs ml-2 w-full uppercase font-extrabold tracking-wide text-brand-brown placeholder-brand-brown/40 py-3 min-w-0">
+                            </div>
+                            <button onclick="applyPromo()" class="bg-brand-brown text-white px-4 py-3 rounded-xl text-xs font-extrabold shadow-md active:scale-95 smooth-transition">Pakai</button>
+                        </div>
+                        <div id="promoStatus" class="hidden text-[10px] font-extrabold text-green-700 mt-3 bg-green-50/90 border border-green-100 px-3 py-2 rounded-xl"><i class="fa-solid fa-circle-check mr-1"></i> Diskon Rp 10.000 aktif</div>
+                    </div>
+
+                    <div class="mt-4 glass-cart-summary p-5 rounded-[24px] text-white space-y-3 relative overflow-hidden">
+                        <i class="fa-solid fa-leaf absolute -right-3 -bottom-4 text-7xl text-white/[.07]"></i>
+                        <div class="flex items-center justify-between relative"><h4 class="font-display font-extrabold text-sm">Ringkasan belanja</h4><i class="fa-solid fa-receipt text-brand-yellow/90"></i></div>
+                        <div class="flex justify-between text-xs font-medium text-white/75 relative"><span>Subtotal</span><span id="cartSubtotal" class="font-bold text-white">Rp 53.000</span></div>
+                        <div class="flex justify-between text-xs font-medium text-white/75 relative"><span>Ongkir lokal</span><span id="cartShipping" class="font-bold text-white">Rp 2.000</span></div>
+                        <div id="cartDiscountRow" class="hidden flex justify-between text-xs font-medium text-green-200 relative"><span>Diskon promo</span><span id="cartDiscountValue" class="font-extrabold">-Rp 10.000</span></div>
+                        <div class="border-t border-white/20 pt-3 mt-1 flex justify-between items-center relative">
+                            <span class="font-bold text-brand-yellow text-sm">Total belanja</span>
+                            <span id="cartTotal" class="font-display font-extrabold text-xl text-white">Rp 55.000</span>
+                        </div>
+                    </div>
+                    <p class="text-center text-[10px] text-brand-brown/50 mt-4 mb-1"><i class="fa-solid fa-shield-halved mr-1"></i>Pesananmu dikemas dengan penuh perhatian.</p>
+                </div>
+
+                <!-- Persistent checkout action; content above remains swipe-scrollable -->
+                <div class="glass-cart-footer shrink-0 px-5 pt-3">
+                    <div class="flex items-center justify-between gap-3 mb-3">
+                        <div class="min-w-0"><p class="text-[10px] text-brand-brown/60 font-bold">TOTAL PEMBAYARAN</p><p id="cartFooterTotal" class="font-display font-extrabold text-lg text-brand-dark mt-0.5">Rp 55.000</p></div>
+                        <span class="text-[9px] font-bold text-brand-brown/55 bg-white/60 border border-white rounded-full px-3 py-2 shrink-0"><i class="fa-solid fa-lock mr-1"></i> Checkout aman</span>
+                    </div>
+                    <button id="cartCheckoutBtn" onclick="setInteractiveScreen(4)" class="w-full bg-gradient-to-r from-brand-brown to-brand-dark text-white rounded-2xl py-4 font-extrabold shadow-[0_9px_22px_rgba(74,53,21,.23)] hover:shadow-xl active:scale-[.98] smooth-transition flex justify-center gap-2 items-center text-sm disabled:opacity-40 disabled:cursor-not-allowed">
+                        Lanjut Checkout <i class="fa-solid fa-arrow-right text-brand-yellow"></i>
+                    </button>
+                </div>
+            </div>
+
+
+            <div id="activeScreen4" class="absolute inset-0 bg-gray-50 hidden flex-col z-30">
+                <div class="bg-white px-5 pt-12 pb-4 shadow-sm flex items-center justify-between z-30 shrink-0 rounded-b-[20px]">
+                    <button onclick="setInteractiveScreen(3)" class="w-10 h-10 bg-brand-light rounded-full flex items-center justify-center text-brand-brown border border-brand-yellow/30">
+                        <i class="fa-solid fa-chevron-left"></i>
+                    </button>
+                    <h2 class="font-display font-bold text-xl text-brand-dark">Pembayaran</h2>
+                    <div class="w-10"></div> <!-- Spacer for center alignment -->
+                </div>
+
+                <div class="flex-1 overflow-y-auto hide-scroll p-5 pb-28 space-y-5">
+                    
+                    <!-- Address Box -->
+                    <div class="bg-white p-5 rounded-[24px] shadow-sm border border-gray-100">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-bold text-sm text-brand-dark uppercase">Alamat Tujuan</h3>
+                            <button onclick="detectGPSLocation()" class="text-xs bg-brand-yellow text-brand-brown font-bold px-3 py-1.5 rounded-lg flex items-center gap-1 shadow-sm">
+                                <i class="fa-solid fa-location-crosshairs"></i> GPS
+                            </button>
+                        </div>
+                        <div class="flex gap-4 items-start bg-brand-light p-3 rounded-xl border border-brand-yellow/30">
+                            <div class="w-10 h-10 bg-brand-brown rounded-full flex items-center justify-center text-brand-yellow shrink-0 shadow-sm">
+                                <i class="fa-solid fa-map-location-dot"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm font-bold text-brand-dark" id="checkoutUserLabel">pannniki (+62 812-3456)</p>
+                                <p class="text-xs text-brand-brown mt-1 font-medium leading-relaxed" id="addressText">Jl. Soekarno Hatta No. 45, Lowokwaru, Malang</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Payment Methods Box -->
+                    <div class="bg-white p-5 rounded-[24px] shadow-sm border border-gray-100">
+                        <h3 class="font-bold text-sm text-brand-dark uppercase mb-4">Metode Pembayaran</h3>
+                        <div class="space-y-3">
+                            <label class="flex items-center justify-between p-3 border-2 border-brand-yellow rounded-xl cursor-pointer bg-brand-light/50">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 bg-white rounded-lg shadow-sm border border-brand-yellow/30 flex items-center justify-center text-brand-brown text-lg"><i class="fa-solid fa-building-columns"></i></div>
+                                    <span class="text-sm font-bold text-brand-dark">Transfer Bank</span>
+                                </div>
+                                <input type="radio" name="pay" checked class="w-5 h-5">
+                            </label>
+                            
+                            <label class="flex items-center justify-between p-3 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50 smooth-transition">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 bg-white rounded-lg shadow-sm border border-gray-200 flex items-center justify-center text-blue-500 text-lg"><i class="fa-solid fa-wallet"></i></div>
+                                    <span class="text-sm font-semibold text-gray-700">E-Wallet (GoPay / QRIS)</span>
+                                </div>
+                                <input type="radio" name="pay" class="w-5 h-5">
+                            </label>
+                            
+                            <label class="flex items-center justify-between p-3 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50 smooth-transition">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 bg-white rounded-lg shadow-sm border border-gray-200 flex items-center justify-center text-green-600 text-lg"><i class="fa-solid fa-hand-holding-dollar"></i></div>
+                                    <span class="text-sm font-semibold text-gray-700">Bayar di Tempat (COD)</span>
+                                </div>
+                                <input type="radio" name="pay" class="w-5 h-5">
+                            </label>
+                        </div>
+                    </div>
+
+                    <button onclick="processOrder()" class="w-full bg-brand-brown text-white rounded-[20px] py-4 font-bold shadow-xl hover:bg-brand-dark flex justify-between px-6 items-center">
+                        <div class="text-left flex flex-col">
+                            <span class="text-[10px] text-brand-yellow uppercase tracking-wider font-semibold">Total Bayar</span>
+                            <span id="checkoutGrandTotal" class="text-lg font-bold">Rp 0</span>
+                        </div>
+                        <span class="text-base flex items-center gap-2">Bayar Sekarang <i class="fa-solid fa-circle-check"></i></span>
+                    </button>
+                </div>
+            </div>
+
+
+            <div id="activeScreen5" class="absolute inset-0 bg-white hidden flex-col z-40 overflow-y-auto hide-scroll">
+                <div class="flex-1 flex flex-col items-center pt-24 px-6 pb-12">
+                    
+                    <div class="w-24 h-24 bg-brand-yellow rounded-full flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(252,181,57,0.4)] border-4 border-white relative">
+                        <i class="fa-solid fa-check text-4xl text-brand-brown"></i>
+                        <!-- Sparks -->
+                        <i class="fa-solid fa-star absolute -top-2 -right-2 text-gold text-lg"></i>
+                        <i class="fa-solid fa-star absolute bottom-0 -left-3 text-gold text-sm"></i>
+                    </div>
+                    
+                    <h2 class="font-display font-bold text-2xl text-brand-dark mb-2">Pemesanan Sukses!</h2>
+                    <p class="text-sm text-brand-brown font-medium text-center">Keripik Keluarga Sakinah sedang disiapkan.</p>
+                    
+                    <div class="bg-brand-light px-5 py-3 rounded-xl mt-4 text-xs font-bold text-brand-brown border border-brand-yellow/50 shadow-sm text-center">
+                        No. Invoice<br>
+                        <span id="invoiceNumber" class="text-lg font-display text-brand-dark">#SKS-20261015</span>
+                    </div>
+
+                    <!-- Tracking Box -->
+                    <div class="w-full bg-white border border-gray-100 shadow-lg rounded-[24px] p-6 mt-8">
+                        <h3 class="font-bold text-sm mb-6 text-brand-dark uppercase border-b border-gray-100 pb-2">Status Pesanan Real-time</h3>
+                        
+                        <div class="space-y-6 relative before:absolute before:inset-0 before:ml-[15px] before:-translate-x-px before:h-full before:w-0.5 before:bg-gradient-to-b before:from-brand-yellow before:via-gray-200 before:to-gray-200">
+                            
+                            <div class="relative flex items-center gap-5">
+                                <div class="w-8 h-8 rounded-full bg-brand-yellow text-brand-brown flex items-center justify-center text-xs shadow-md z-10 border-2 border-white"><i class="fa-solid fa-check"></i></div>
+                                <div>
+                                    <h4 class="text-sm font-bold text-brand-dark">Pesanan Diterima</h4>
+                                    <p class="text-[10px] text-gray-500 font-medium">11:10 AM</p>
+                                </div>
+                            </div>
+                            
+                            <div class="relative flex items-center gap-5">
+                                <div class="w-8 h-8 rounded-full bg-brand-yellow text-brand-brown flex items-center justify-center text-xs shadow-md z-10 border-2 border-white"><i class="fa-solid fa-box-open"></i></div>
+                                <div>
+                                    <h4 class="text-sm font-bold text-brand-dark">Sedang Dikemas</h4>
+                                    <p class="text-[10px] text-gray-500 font-medium">Dapur Keluarga Sakinah</p>
+                                </div>
+                            </div>
+                            
+                            <div class="relative flex items-center gap-5">
+                                <div class="w-8 h-8 rounded-full bg-white border-4 border-brand-yellow flex items-center justify-center z-10 shadow-sm relative">
+                                    <div class="absolute inset-0 bg-brand-yellow opacity-40 rounded-full animate-ping"></div>
+                                </div>
+                                <div>
+                                    <h4 class="text-sm font-bold text-brand-dark">Dikirim Kurir Lokal 🛵</h4>
+                                    <p class="text-[11px] text-brand-brown font-bold mt-1 bg-brand-light inline-block px-2 py-0.5 rounded border border-brand-yellow/30">Estimasi Tiba: 20 Menit</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button onclick="setInteractiveScreen(6)" class="w-full bg-brand-brown text-white rounded-xl py-4 mt-8 font-bold shadow-md hover:bg-brand-dark transition">
+                        Simulasi Selesai (Diterima)
+                    </button>
+                </div>
+            </div>
+
+
+            <div id="activeScreen6" class="absolute inset-0 bg-gray-50 hidden flex-col z-40 pt-16 px-5 pb-10 overflow-y-auto hide-scroll">
+                
+                <div class="bg-white p-6 rounded-[24px] shadow-sm border border-gray-100 text-center mb-5">
+                    <div class="w-20 h-20 bg-brand-light rounded-full mx-auto flex items-center justify-center mb-4 border border-brand-yellow">
+                        <div class="text-4xl">🎉</div>
+                    </div>
+                    <h2 class="font-display font-bold text-xl text-brand-dark">Pesanan Diterima</h2>
+                    <p class="text-xs text-brand-brown mt-1 font-medium">Terima kasih telah berbelanja di Keripik Sakinah!</p>
+
+                    <div class="border-t border-gray-100 mt-6 pt-5">
+                        <h3 class="font-bold text-sm text-brand-dark mb-2">Bagaimana rasa keripik kami?</h3>
+                        <div class="flex justify-center gap-2 text-3xl text-gray-300 mb-4" id="starPicker">
+                            <span onclick="rateStars(1)" class="hover:text-brand-yellow cursor-pointer smooth-transition">★</span>
+                            <span onclick="rateStars(2)" class="hover:text-brand-yellow cursor-pointer smooth-transition">★</span>
+                            <span onclick="rateStars(3)" class="hover:text-brand-yellow cursor-pointer smooth-transition">★</span>
+                            <span onclick="rateStars(4)" class="hover:text-brand-yellow cursor-pointer smooth-transition">★</span>
+                            <span onclick="rateStars(5)" class="text-brand-yellow cursor-pointer smooth-transition drop-shadow-md">★</span>
+                        </div>
+
+                        <textarea id="reviewComment" rows="3" placeholder="Bagikan kesan serumu mengemil keripik ini..." class="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-xs font-medium focus:outline-none focus:border-brand-yellow focus:ring-1 focus:ring-brand-yellow mb-4 text-brand-dark"></textarea>
+                        
+                        <button onclick="submitReview()" class="w-full bg-brand-yellow text-brand-brown rounded-xl py-3 text-sm font-bold shadow-md hover:bg-yellow-400">
+                            Kirim Ulasan Bintang
+                        </button>
+                    </div>
+                </div>
+
+                <button onclick="reorderItems()" class="w-full bg-brand-brown text-white rounded-2xl py-4 font-bold shadow-lg flex justify-center items-center gap-2 mb-4 hover:bg-brand-dark">
+                    <i class="fa-solid fa-rotate-right"></i> Pesan Lagi (Reorder)
+                </button>
+
+                <button onclick="setInteractiveScreen(1)" class="w-full py-3 text-sm font-bold text-gray-400 hover:text-brand-brown transition">
+                    Kembali ke Beranda
+                </button>
+            </div>
+
+            <!-- LAYAR 7: PROFIL UMKM -->
+            <div id="activeScreen7" class="absolute inset-0 bg-gray-50 hidden flex-col z-30">
+                <div class="bg-gradient-to-br from-[#FFD875] via-[#FCB539] to-[#F57C00] px-5 pt-14 pb-6 shadow-md flex flex-col items-center justify-center z-30 shrink-0 rounded-b-[35px] relative">
+                    <div class="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-lg border-4 border-brand-brown mb-3">
+                        <div class="font-display font-extrabold text-brand-brown leading-none text-2xl">KS</div>
+                    </div>
+                    <h2 class="font-display font-bold text-xl text-brand-dark">Keluarga Sakinah</h2>
+                    <p class="text-xs font-semibold text-brand-brown mt-0.5 bg-white/50 backdrop-blur-sm px-3 py-1 rounded-full shadow-sm">UMKM Oleh-oleh Malang</p>
+                </div>
+
+                <div class="flex-1 overflow-y-auto hide-scroll p-5 pb-28 space-y-4">
+                    <div class="bg-white p-5 rounded-[24px] shadow-sm border border-gray-100">
+                        <h3 class="font-bold text-sm text-brand-dark uppercase border-b border-gray-100 pb-2 mb-3">Profil & Sejarah</h3>
+                        <p class="text-xs text-gray-500 leading-relaxed font-medium">Dirintis oleh Ibu Nikamah, berawal dari inisiatif sederhana mengolah hasil panen kebun pisang dan talas pribadi. Dari buah tangan untuk tetangga, kini Keripik Keluarga Sakinah berkembang menjadi oleh-oleh favorit yang diperhitungkan di kota Malang.</p>
+                    </div>
+
+                    <div class="bg-white p-5 rounded-[24px] shadow-sm border border-gray-100">
+                        <h3 class="font-bold text-sm text-brand-dark uppercase border-b border-gray-100 pb-2 mb-3">Visi & Misi</h3>
+                        <div class="space-y-3">
+                            <div>
+                                <h4 class="text-xs font-bold text-orange-600">Visi:</h4>
+                                <p class="text-[11px] text-gray-500 leading-relaxed font-medium mt-1">Menjadi UMKM keripik berbasis hasil bumi lokal yang paling dicintai, dipercaya, dan menghadirkan kehangatan rasa keluarga.</p>
+                            </div>
+                            <div>
+                                <h4 class="text-xs font-bold text-orange-600">Misi & Keunggulan:</h4>
+                                <ul class="list-disc pl-4 text-[11px] text-gray-500 mt-1 space-y-1 font-medium">
+                                    <li>Menghasilkan keripik enak & gurih (Pisang & Talas).</li>
+                                    <li>Kualitas dari bahan baku kebun sendiri.</li>
+                                    <li>Harga terjangkau dengan isi yang melimpah.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LAYAR 8: FAVORIT SAYA -->
+            <div id="activeScreen8" class="absolute inset-0 bg-gray-50 hidden flex-col z-30">
+                <div class="bg-white px-5 pt-12 pb-4 shadow-sm flex items-center justify-between z-30 shrink-0 rounded-b-[20px]">
+                    <h2 class="font-display font-bold text-xl text-brand-dark">Produk Favorit</h2>
+                    <div class="w-8 h-8 bg-red-50 text-red-500 rounded-full flex items-center justify-center">
+                        <i class="fa-solid fa-heart"></i>
+                    </div>
+                </div>
+
+                <div class="flex-1 overflow-y-auto hide-scroll p-5 pb-28">
+                    <p class="text-xs font-bold text-gray-400 mb-4 uppercase">Keripik Kesukaan Anda</p>
+                    <div class="grid grid-cols-2 gap-4">
+                        <!-- Fav Item 1 -->
+                        <div class="bg-white rounded-[24px] p-3 shadow-sm border border-brand-yellow/30 relative cursor-pointer hover:shadow-md smooth-transition flex flex-col" onclick="openProductDetail(104)">
+                            <div class="absolute top-2 right-2 w-7 h-7 bg-white/90 backdrop-blur rounded-full flex items-center justify-center text-red-500 shadow-sm z-10">
+                                <i class="fa-solid fa-heart text-xs"></i>
+                            </div>
+                            <div class="w-full h-32 bg-brand-light rounded-[18px] overflow-hidden mb-3 relative flex items-center justify-center">
+                                <img src="https://awsimages.detik.net.id/community/media/visual/2024/06/22/keripik-pisang-kekinian-3.jpeg?q=90&w=700" class="w-full h-full object-cover" alt="Keripik Pisang">
+                            </div>
+                            <h4 class="font-bold text-sm text-brand-dark leading-tight flex-1">Keripik Pisang Lumer Coklat</h4>
+                            <div class="flex items-center justify-between mt-3">
+                                <div class="text-sm font-bold text-brand-brown">Rp 19.000</div>
+                                <button class="w-7 h-7 bg-brand-brown text-white rounded-full flex items-center justify-center shadow-md">
+                                    <i class="fa-solid fa-cart-plus text-xs"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Fav Item 2 -->
+                        <div class="bg-white rounded-[24px] p-3 shadow-sm border border-brand-yellow/30 relative cursor-pointer hover:shadow-md smooth-transition flex flex-col" onclick="openProductDetail(101)">
+                            <div class="absolute top-2 right-2 w-7 h-7 bg-white/90 backdrop-blur rounded-full flex items-center justify-center text-red-500 shadow-sm z-10">
+                                <i class="fa-solid fa-heart text-xs"></i>
+                            </div>
+                            <div class="w-full h-32 bg-brand-light rounded-[18px] overflow-hidden mb-3 relative flex items-center justify-center">
+                                <img src="https://www.static-src.com/wcsstore/Indraprastha/images/catalog/full/catalog-image/110/MTA-170699257/krilazz_krilazz_keripik_talas_pedas_manis_80_gr_full01_c9873ba0.jpg" class="w-full h-full object-cover" alt="Keripik Talas">
+                            </div>
+                            <h4 class="font-bold text-sm text-brand-dark leading-tight flex-1">Keripik Talas Pedas Manis</h4>
+                            <div class="flex items-center justify-between mt-3">
+                                <div class="text-sm font-bold text-brand-brown">Rp 15.000</div>
+                                <button class="w-7 h-7 bg-brand-brown text-white rounded-full flex items-center justify-center shadow-md">
+                                    <i class="fa-solid fa-cart-plus text-xs"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI CHAT WIDGET (GEMINI) -->
+            <button onclick="toggleAiChat()" id="aiChatFab" aria-label="Buka pesan Asisten Sakinah" title="Chat Asisten Sakinah" class="absolute bottom-24 right-5 w-16 h-16 bg-white/65 backdrop-blur-2xl text-brand-brown rounded-[23px] flex items-center justify-center shadow-[0_12px_28px_rgba(111,80,32,.24)] z-50 hover:scale-105 smooth-transition border border-white/90 ring-1 ring-brand-yellow/30">
+                <span class="relative w-11 h-11 rounded-2xl bg-gradient-to-br from-brand-yellow to-orange-300 flex items-center justify-center shadow-inner">
+                    <i class="fa-solid fa-comment-dots text-[27px] text-brand-brown"></i>
+                    <span class="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-white border-2 border-brand-yellow flex items-center justify-center text-brand-brown text-[12px] shadow-sm" aria-hidden="true"><i class="fa-solid fa-robot"></i></span>
+                </span>
+                <span class="absolute -top-1 -right-1 flex h-4 w-4">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-4 w-4 bg-red-500 text-white text-[8px] items-center justify-center font-bold">1</span>
+                </span>
+            </button>
+
+            <div id="aiChatWindow" class="absolute bottom-40 right-5 left-5 bg-white rounded-2xl shadow-2xl border border-brand-yellow/50 z-50 flex-col hidden overflow-hidden h-[400px] smooth-transition transform translate-y-4 opacity-0">
+                <div class="bg-brand-brown p-3 flex justify-between items-center text-white shrink-0">
+                    <div class="flex items-center gap-2">
+                        <div class="w-8 h-8 bg-brand-yellow rounded-full flex items-center justify-center text-brand-brown font-bold text-xs shadow-sm">IN</div>
+                        <div>
+                            <div class="font-bold text-xs leading-tight text-brand-yellow">Asisten Ibu Nikamah (AI)</div>
+                            <div class="text-[9px] text-brand-light flex items-center gap-1"><span class="w-1.5 h-1.5 bg-green-400 rounded-full inline-block"></span> Online (Gemini AI)</div>
+                        </div>
+                    </div>
+                    <button onclick="toggleAiChat()" class="text-white hover:text-brand-yellow smooth-transition"><i class="fa-solid fa-xmark text-lg"></i></button>
+                </div>
+                
+                <div id="aiChatMessages" class="flex-1 overflow-y-auto p-4 bg-gray-50 space-y-4 hide-scroll text-sm">
+                    <div class="flex justify-start">
+                        <div class="bg-white border border-gray-200 text-brand-dark p-3 rounded-2xl rounded-tl-sm max-w-[85%] shadow-sm text-xs font-medium">
+                            Halo rek! 👋 Saya Asisten Ibu Nikamah (AI). Ada yang mau ditanyakan soal Keripik Sakinah, stok rasa, atau rekomendasi oleh-oleh?
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="p-3 bg-white border-t border-gray-100 shrink-0 flex gap-2 items-center">
+                    <input type="text" id="aiChatInput" placeholder="Tanya Ibu Nikamah..." class="flex-1 bg-brand-light border border-brand-yellow/50 focus:border-brand-yellow rounded-xl px-3 py-2 text-xs focus:outline-none text-brand-dark font-medium" onkeypress="handleAiChatEnter(event)">
+                    <button onclick="sendAiMessage()" id="aiSendBtn" class="w-9 h-9 bg-brand-brown text-white rounded-xl flex items-center justify-center shadow-sm hover:bg-brand-dark smooth-transition">
+                        <i class="fa-solid fa-paper-plane text-xs"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Bottom Navigation Bar Update -->
+            <div id="bottomNavigation" class="absolute bottom-0 inset-x-0 glass-nav border-t border-brand-yellow/20 px-6 py-3 pb-8 flex justify-between items-center z-40 rounded-b-[45px]">
+                <button onclick="setInteractiveScreen(1)" class="bottom-nav-item flex flex-col items-center gap-1 text-brand-brown smooth-transition">
+                    <i class="fa-solid fa-house text-xl"></i>
+                    <div class="w-1.5 h-1.5 bg-brand-yellow rounded-full mt-0.5 nav-dot"></div>
+                </button>
+                <button onclick="setInteractiveScreen(8)" class="bottom-nav-item flex flex-col items-center gap-1 text-gray-300 hover:text-brand-yellow smooth-transition">
+                    <i class="fa-solid fa-heart text-xl"></i>
+                </button>
+                <button onclick="setInteractiveScreen(3)" class="bottom-nav-item flex flex-col items-center gap-1 text-gray-300 hover:text-brand-yellow smooth-transition relative">
+                    <i class="fa-solid fa-cart-shopping text-xl"></i>
+                    <span id="badgeCartCount" class="absolute -top-1.5 -right-2 bg-brand-yellow text-brand-brown text-[10px] font-extrabold w-[18px] h-[18px] rounded-full flex items-center justify-center border-2 border-white shadow-sm">2</span>
+                </button>
+                <button onclick="setInteractiveScreen(7)" class="bottom-nav-item flex flex-col items-center gap-1 text-gray-300 hover:text-brand-yellow smooth-transition">
+                    <i class="fa-solid fa-user text-xl"></i>
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // State Management
+        let currentScreen = 1;
+        let selectedSize = '200g';
+        let selectedFlavor = 'Pedas Manis';
+        let detailQty = 1;
+        let currentDetailProduct = null;
+        let promoDiscount = 0;
+        let currentUser = 'pannniki';
+
+        const sizeMultipliers = {
+            '100g': 0.7,
+            '200g': 1.0,
+            '250g': 1.25,
+            '500g': 2.2,
+            '250ml': 0.75,
+            '350ml': 1.0,
+            '500ml': 1.35,
+            '1 pack': 1.0,
+            '2 pack': 2.0,
+            '3 pack': 3.0
+        };
+
+        // Data Dinamis Produk Beranda (Filter Kategori & Dynamic Detail)
+        // Foto referensi produk dipilih agar sesuai nama/varian. Untuk penjualan komersial, ganti dengan foto produk milik sendiri atau berlisensi.
+        const productImages = {
+            talasPedas: 'https://www.static-src.com/wcsstore/Indraprastha/images/catalog/full/catalog-image/110/MTA-170699257/krilazz_krilazz_keripik_talas_pedas_manis_80_gr_full01_c9873ba0.jpg',
+            talasOriginal: 'https://www.karyakreatifindonesia.co.id/download/cHJvZHVjdDpwcm9kdWN0cy9pbWFnZXMvOC1mMm9vQTd4LTIwMjUwNjE4LmpwZw%3D%3D',
+            pisangManis: 'https://awsimages.detik.net.id/community/media/visual/2024/06/22/keripik-pisang-kekinian-3.jpeg?q=90&w=700',
+            pisangCoklat: 'https://smexpo.pertamina.com/data-smexpo/images/products/5076/lumer_coklat_-_2_1743953861.JPG',
+            singkong: 'https://cdn.shopify.com/s/files/1/0566/6540/7545/files/keripik-singkong-cassava-chips-tapioca-chips-is-traditional-snack-from-java_1024x1024.jpg?v=1692072102',
+            jaheInstan: 'images/jahe-instan.svg',
+            kunirInstan: 'images/kunir-instan.svg'
+        };
+
+        const homeProductsData = [
+            { id: 101, name: 'Keripik Talas Pedas Manis', cat: 'Talas', price: 15000, rating: 4.9, img: productImages.talasPedas, badge: 'Paling Laris', desc: 'Keripik talas renyah dengan bumbu pedas manis gurih, cocok untuk teman santai dan berbagi bersama keluarga.', sold: '1.2k+' },
+            { id: 102, name: 'Keripik Talas Asin Original', cat: 'Talas', price: 15000, rating: 4.8, img: productImages.talasOriginal, badge: '', desc: 'Irisan talas tipis dan renyah dengan cita rasa gurih original yang sederhana dan nagih.', sold: '800+' },
+            { id: 103, name: 'Keripik Pisang Manis Asli', cat: 'Pisang', price: 18000, rating: 4.8, img: productImages.pisangManis, badge: 'Baru', desc: 'Keripik pisang keemasan dengan rasa manis alami dan tekstur renyah di setiap gigitan.', sold: '950+' },
+            { id: 104, name: 'Keripik Pisang Lumer Coklat', cat: 'Pisang', price: 19000, rating: 4.9, img: productImages.pisangCoklat, badge: 'Favorit', desc: 'Keripik pisang dengan balutan cokelat pekat untuk camilan manis yang memanjakan.', sold: '1.5k+' },
+            { id: 105, name: 'Jahe Instan', cat: 'Minuman', price: null, rating: null, sold: '', unitType: 'instant', img: productImages.jaheInstan, badge: 'Herbal', desc: 'Jahe instan praktis untuk diseduh. Foto kemasan dapat diganti dengan foto produk asli.' },
+            { id: 106, name: 'Kunir Instan', cat: 'Minuman', price: null, rating: null, sold: '', unitType: 'instant', img: productImages.kunirInstan, badge: 'Herbal', desc: 'Kunir instan praktis untuk diseduh. Foto kemasan dapat diganti dengan foto produk asli.' },
+            { id: 107, name: 'Keripik Singkong Original', cat: 'Camilan', price: 12000, rating: 4.8, img: productImages.singkong, badge: 'Gurih', desc: 'Keripik singkong tipis berwarna keemasan dengan rasa original gurih dan tekstur renyah.', sold: '870+' }
+        ];
+
+        // Keranjang dimulai kosong; item hanya bertambah setelah dipilih pengguna.
+        let cartItems = [];
+
+        // On Load Initialization
+        window.addEventListener('DOMContentLoaded', () => {
+            currentDetailProduct = homeProductsData[0];
+            renderCartUI();
+            renderHomeProducts('Semua');
+            triggerSplashScreen();
+            initCategoryDragScroll();
+        });
+
+        // Open Product Detail Screen with Dynamic Data
+        function openProductDetail(productId) {
+            const prod = homeProductsData.find(p => p.id === productId) || homeProductsData[0];
+            currentDetailProduct = prod;
+
+            // Populate UI Elements
+            document.getElementById('detailImg').src = prod.img;
+            document.getElementById('detailTitle').innerText = prod.name;
+            const hasSocialProof = Number.isFinite(prod.rating) && Boolean(prod.sold);
+            document.getElementById('detailSocialProof').classList.toggle('hidden', !hasSocialProof);
+            document.getElementById('detailRating').innerText = hasSocialProof ? prod.rating : '';
+            document.getElementById('detailSold').innerText = hasSocialProof ? `Terjual ${prod.sold}` : '';
+            document.getElementById('detailDesc').innerText = prod.desc;
+            document.getElementById('detailCategoryBadge').innerText = prod.cat;
+
+            // Set default selections based on product type
+            selectedSize = prod.unitType === 'instant' ? '1 pack' : (prod.cat === 'Minuman' ? '350ml' : '200g');
+            selectedFlavor = prod.unitType === 'instant' ? 'Original' : (prod.cat === 'Minuman' ? 'Gula Normal' : (prod.id === 104 ? 'Cokelat Lumer' : prod.id === 103 ? 'Manis Original' : prod.id === 102 ? 'Original Asin' : 'Pedas Manis'));
+            detailQty = 1;
+
+            renderSizeButtons();
+            renderFlavorButtons();
+            updateQty(0);
+
+            setInteractiveScreen(2);
+        }
+
+        function renderSizeButtons() {
+            const container = document.getElementById('detailSizeContainer');
+            const sizes = currentDetailProduct && currentDetailProduct.unitType === 'instant'
+                ? ['1 pack', '2 pack', '3 pack']
+                : (currentDetailProduct && currentDetailProduct.cat === 'Minuman' ? ['250ml', '350ml', '500ml'] : ['100g', '200g', '250g', '500g']);
+            
+            container.innerHTML = sizes.map(sz => {
+                const isActive = sz === selectedSize;
+                const activeClass = isActive 
+                    ? 'border-2 border-brand-brown bg-brand-brown text-white shadow-md font-bold' 
+                    : 'border border-gray-200 bg-white text-gray-600 font-semibold hover:border-brand-yellow';
+                return `<button onclick="selectSize('${sz}')" class="py-2 rounded-xl text-xs ${activeClass} smooth-transition text-center">${sz}</button>`;
+            }).join('');
+
+            document.getElementById('selectedSizeLabel').innerText = `${selectedSize}`;
+        }
+
+        function renderFlavorButtons() {
+            const container = document.getElementById('detailFlavorContainer');
+            const flavors = currentDetailProduct.unitType === 'instant'
+                ? ['Original']
+                : (currentDetailProduct.cat === 'Minuman'
+                ? ['Gula Normal', 'Kurang Manis', 'Extra Es', 'Tanpa Es']
+                : (currentDetailProduct.cat === 'Pisang'
+                    ? ['Cokelat Lumer', 'Manis Original', 'Keju Gurih', 'Balado Pedas']
+                    : ['Pedas Manis', 'Original Asin', 'Extra Pedas', 'Balado Spesial']));
+
+            container.innerHTML = flavors.map(fl => {
+                const isActive = fl === selectedFlavor;
+                const activeClass = isActive 
+                    ? 'border-2 border-brand-yellow bg-brand-yellow text-brand-brown shadow-sm font-bold' 
+                    : 'border border-gray-200 bg-white text-gray-600 font-semibold hover:border-brand-yellow';
+                return `<button onclick="selectFlavor('${fl}')" class="py-2.5 px-3 rounded-xl text-xs ${activeClass} smooth-transition text-center">${fl}</button>`;
+            }).join('');
+
+            document.getElementById('selectedFlavorLabel').innerText = `${selectedFlavor}`;
+        }
+
+        function selectSize(sizeVal) {
+            selectedSize = sizeVal;
+            renderSizeButtons();
+            updateQty(0);
+        }
+
+        function selectFlavor(flavorName) {
+            selectedFlavor = flavorName;
+            renderFlavorButtons();
+        }
+
+        function getCalculatedUnitPrice() {
+            if (!currentDetailProduct || !Number.isFinite(currentDetailProduct.price) || currentDetailProduct.price <= 0) return null;
+            const mult = sizeMultipliers[selectedSize] || 1.0;
+            return Math.round((currentDetailProduct.price * mult) / 1000) * 1000;
+        }
+
+        function updateQty(delta) {
+            detailQty += delta;
+            if (detailQty < 1) detailQty = 1;
+            document.getElementById('detailQty').innerText = detailQty;
+            
+            const unitPrice = getCalculatedUnitPrice();
+            const total = unitPrice === null ? null : detailQty * unitPrice;
+            document.getElementById('detailTotalPrice').innerText = total === null ? 'Harga menyusul' : `Rp ${total.toLocaleString('id-ID')}`;
+        }
+
+        function addToCartAndNavigate() {
+            const unitPrice = getCalculatedUnitPrice();
+            if (unitPrice === null) { showToast('Harga belum tersedia', 'Harga produk ini akan ditambahkan setelah ditentukan.'); return; }
+            const existingIndex = cartItems.findIndex(item => 
+                item.name === currentDetailProduct.name && 
+                item.size === selectedSize && 
+                item.flavor === selectedFlavor
+            );
+
+            if (existingIndex > -1) {
+                cartItems[existingIndex].qty += detailQty;
+            } else {
+                cartItems.push({
+                    id: Date.now(),
+                    name: currentDetailProduct.name,
+                    size: selectedSize,
+                    flavor: selectedFlavor,
+                    price: unitPrice,
+                    qty: detailQty,
+                    img: currentDetailProduct.img
+                });
+            }
+
+            renderCartUI();
+            showToast('Keranjang Belanja', `${detailQty}x ${currentDetailProduct.name} (${selectedSize}, ${selectedFlavor}) ditambahkan.`);
+            setInteractiveScreen(3);
+        }
+
+        function toggleFavoriteDetail(btn) {
+            btn.classList.toggle('text-red-500');
+            btn.classList.toggle('text-gray-400');
+            const isFav = btn.classList.contains('text-red-500');
+            showToast('Favorit Saya', isFav ? 'Ditambahkan ke produk favorit.' : 'Dihapus dari favorit.');
+        }
+
+        // Render Home Products
+        function renderProductsToGrid(productsList) {
+            const grid = document.getElementById('homeProductGrid');
+            if (!grid) return;
+            if (!productsList.length) {
+                grid.innerHTML = '<div class="col-span-2 text-center py-9 ios-glass rounded-[24px]"><i class="fa-solid fa-cookie-bite text-3xl text-brand-yellow mb-2"></i><p class="text-xs font-bold text-brand-brown">Belum ada produk di kategori ini.</p></div>';
+                return;
+            }
+            grid.innerHTML = productsList.map(p => `
+                <article class="ios-glass rounded-[24px] p-2.5 relative cursor-pointer hover:-translate-y-0.5 smooth-transition flex flex-col group overflow-hidden" onclick="openProductDetail(${p.id})">
+                    <div class="w-full h-[118px] rounded-[18px] bg-gradient-to-br from-[#FFF7E5] to-[#E9DCC6] overflow-hidden mb-3 relative flex items-center justify-center">
+                        <img src="${p.img}" loading="lazy" decoding="async" referrerpolicy="no-referrer" class="w-full h-full object-cover group-hover:scale-105 smooth-transition duration-300" alt="${p.name}" onerror="this.style.display='none';this.parentElement.classList.add('image-fallback')">
+                        ${p.badge ? `<div class="absolute top-2 left-2 bg-white/88 backdrop-blur-md text-brand-brown text-[9px] font-extrabold px-2 py-1 rounded-full shadow-sm border border-white/80">${p.badge}</div>` : ''}
+                        <button aria-label="Pilih varian ${p.name}" title="Pilih varian dan lanjutkan ke keranjang" class="absolute bottom-2 right-2 w-8 h-8 bg-white/90 backdrop-blur rounded-full text-brand-brown border border-white shadow-md flex items-center justify-center" onclick="event.stopPropagation(); openProductDetail(${p.id})"><i class="fa-solid fa-cart-plus text-[14px]"></i></button>
+                    </div>
+                    <h4 class="font-display font-extrabold text-[12px] text-brand-dark leading-snug min-h-[34px]">${p.name}</h4>
+                    <div class="flex items-center gap-1 mt-1.5 mb-2">${Number.isFinite(p.rating) && p.sold ? `<i class="fa-solid fa-star text-brand-yellow text-[9px]"></i><span class="text-[10px] font-extrabold text-brand-brown/70">${p.rating}</span><span class="text-[9px] text-brand-brown/45">• ${p.sold} terjual</span>` : `<span class="text-[9px] font-semibold text-brand-brown/50">Produk baru</span>`}</div>
+                    <div class="flex items-center justify-between mt-auto pt-2 border-t border-white/75 gap-1">
+                        <div class="text-[12px] font-extrabold text-brand-brown">${Number.isFinite(p.price) && p.price > 0 ? `Rp ${p.price.toLocaleString('id-ID')}` : 'Harga menyusul'}</div>
+                        <span class="text-[9px] font-bold text-orange-700 bg-orange-50/90 px-2 py-1 rounded-full">Detail</span>
+                    </div>
+                </article>
+            `).join('');
+        }
+
+        function renderHomeProducts(category = 'Semua') {
+            const filtered = category === 'Semua' ? homeProductsData : homeProductsData.filter(p => p.cat === category);
+            const title = document.getElementById('productGridTitle');
+            const categoryTitles = { 'Talas': 'Keripik Talas', 'Pisang': 'Keripik Pisang', 'Minuman': 'Minuman Instan', 'Camilan': 'Produk Camilan', 'Lainnya': 'Produk Lainnya' };
+            if (title) title.innerText = category === 'Semua' ? 'Produk Unggulan' : (categoryTitles[category] || `Produk ${category}`);
+            const countLabel = document.getElementById('productCountLabel');
+            if (countLabel) countLabel.textContent = `${filtered.length} produk`;
+            renderProductsToGrid(filtered);
+        }
+
+        function initCategoryDragScroll() {
+            const el = document.getElementById('categoryButtons');
+            if (!el) return;
+            let down = false, startX = 0, scrollLeft = 0;
+            el.addEventListener('pointerdown', e => {
+                if (e.pointerType === 'touch') return;
+                down = true; startX = e.clientX; scrollLeft = el.scrollLeft;
+                el.classList.add('cursor-grabbing');
+            });
+            el.addEventListener('pointermove', e => {
+                if (!down) return;
+                el.scrollLeft = scrollLeft - (e.clientX - startX);
+            });
+            ['pointerup','pointercancel','pointerleave'].forEach(type => el.addEventListener(type, () => {
+                down = false; el.classList.remove('cursor-grabbing');
+            }));
+        }
+
+        // Search Handling Function
+        function handleSearch() {
+            const query = document.getElementById('searchInput').value.trim().toLowerCase();
+            const grid = document.getElementById('homeProductGrid');
+            const title = document.getElementById('productGridTitle');
+
+            if (!query) {
+                renderHomeProducts('Semua');
+                return;
+            }
+
+            const filtered = homeProductsData.filter(p => 
+                p.name.toLowerCase().includes(query) || 
+                p.cat.toLowerCase().includes(query)
+            );
+
+            title.innerText = `Hasil Pencarian: "${query}"`;
+
+            if (filtered.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-2 text-center py-10 bg-white/80 backdrop-blur-md rounded-[24px] border border-gray-100 shadow-sm my-2">
+                        <i class="fa-solid fa-cookie-bite text-4xl text-brand-yellow/60 mb-2"></i>
+                        <p class="text-xs font-bold text-gray-500">Produk "${query}" tidak ditemukan.</p>
+                        <button onclick="document.getElementById('searchInput').value=''; handleSearch();" class="mt-3 text-xs bg-gradient-to-r from-brand-yellow to-orange-400 text-brand-brown font-extrabold px-4 py-2 rounded-xl shadow-md">
+                            Lihat Semua Keripik
+                        </button>
+                    </div>`;
+                return;
+            }
+
+            renderProductsToGrid(filtered);
+        }
+
+        // Logic Filter Kategori Beranda
+        function filterCategory(cat, btnElement) {
+            const buttons = document.querySelectorAll('.cat-btn');
+            buttons.forEach(b => {
+                b.className = 'cat-btn px-4 py-2.5 bg-white/75 backdrop-blur-xl text-brand-brown rounded-full text-xs font-bold border border-white/80 whitespace-nowrap shrink-0 shadow-sm smooth-transition flex items-center gap-2';
+                const dot = b.querySelector('.cat-dot');
+                if (dot) dot.remove();
+            });
+
+            if (btnElement) {
+                btnElement.className = 'cat-btn active px-4 py-2.5 bg-brand-brown text-white rounded-full text-xs font-bold shadow-md flex items-center gap-2 whitespace-nowrap shrink-0 smooth-transition border border-brand-brown';
+                btnElement.insertAdjacentHTML('afterbegin', '<span class="w-2 h-2 rounded-full bg-brand-yellow cat-dot"></span>');
+            }
+            renderHomeProducts(cat);
+        }
+
+        // 1. Splash Screen Logic
+        function triggerSplashScreen() {
+            setInteractiveScreen(1); // Set background screen to Home
+            const splash = document.getElementById('splashOverlay');
+            
+            splash.classList.remove('hidden');
+
+            setTimeout(() => {
+                splash.classList.add('hidden');
+                showToast('Halo!', `Selamat datang di Keripik Sakinah, ${currentUser}!`);
+            }, 900); 
+        }
+
+        // 3. Navigation Logic
+        function setInteractiveScreen(screenNum) {
+            currentScreen = screenNum;
+            for (let i = 1; i <= 8; i++) {
+                const scr = document.getElementById(`activeScreen${i}`);
+                if (scr) scr.classList.add('hidden');
+            }
+            const activeScr = document.getElementById(`activeScreen${screenNum}`);
+            if (activeScr) {
+                activeScr.classList.remove('hidden');
+                activeScr.classList.add('flex');
+            }
+
+            const isDesktopApp = document.documentElement.classList.contains('desktop-app');
+            const hideBottomNav = isDesktopApp ? [4, 5, 6].includes(screenNum) : [2, 3, 4, 5, 6].includes(screenNum);
+            const bottomNav = document.getElementById('bottomNavigation');
+            if (bottomNav) bottomNav.classList.toggle('hidden', hideBottomNav);
+            const aiFab = document.getElementById('aiChatFab');
+            if (aiFab) aiFab.classList.toggle('hidden', hideBottomNav);
+            if (hideBottomNav) {
+                const chatWindow = document.getElementById('aiChatWindow');
+                if (chatWindow) chatWindow.classList.add('hidden');
+                if (typeof isAiChatOpen !== 'undefined') isAiChatOpen = false;
+            }
+
+            if (screenNum === 2) {
+                detailQty = 1;
+                updateQty(0);
+            }
+            if (screenNum === 3) {
+                renderCartUI();
+                requestAnimationFrame(() => {
+                    const scrollBody = document.getElementById('cartScrollBody');
+                    if (scrollBody) scrollBody.scrollTop = 0;
+                });
+            }
+            updateBottomNav(screenNum);
+        }
+
+        function updateBottomNav(screenNum) {
+            const navItems = document.querySelectorAll('.bottom-nav-item');
+            navItems.forEach(item => {
+                item.classList.remove('nav-active');
+                const dot = item.querySelector('.nav-dot');
+                if (dot) dot.remove();
+            });
+            let activeIndex = -1;
+            if (screenNum === 1 || screenNum === 2) activeIndex = 0;
+            if (screenNum === 8) activeIndex = 1;
+            if ([3, 4, 5, 6].includes(screenNum)) activeIndex = 2;
+            if (screenNum === 7) activeIndex = 3;
+            if (activeIndex >= 0 && navItems[activeIndex]) {
+                navItems[activeIndex].classList.add('nav-active');
+                const dot = document.createElement('span');
+                dot.className = 'nav-dot w-1.5 h-1.5 bg-brand-yellow rounded-full mt-0.5';
+                navItems[activeIndex].appendChild(dot);
+            }
+        }
+
+        // 5. Cart Logic
+        function renderCartUI() {
+            const listContainer = document.getElementById('cartItemsList');
+            if (!listContainer) return;
+            const totalCount = cartItems.reduce((sum, item) => sum + item.qty, 0);
+            const totalAmount = cartItems.reduce((sum, item) => sum + (item.price * item.qty), 0);
+            const shipping = cartItems.length > 0 ? 2000 : 0;
+            if (cartItems.length === 0) promoDiscount = 0;
+            const discount = Math.min(promoDiscount, totalAmount);
+            const finalTotal = Math.max(0, totalAmount - discount) + shipping;
+
+            if (cartItems.length === 0) {
+                listContainer.innerHTML = `
+                    <div class="glass-cart-card text-center py-9 px-5 rounded-[26px]">
+                        <div class="w-16 h-16 mx-auto rounded-[22px] bg-brand-yellow/20 text-brand-brown flex items-center justify-center mb-3 border border-white"><i class="fa-solid fa-basket-shopping text-2xl"></i></div>
+                        <p class="font-display text-sm font-extrabold text-brand-dark">Keranjang masih kosong</p>
+                        <p class="text-[11px] text-brand-brown/60 mt-1">Yuk, pilih camilan favoritmu dulu.</p>
+                        <button onclick="setInteractiveScreen(1)" class="mt-4 bg-brand-brown text-white px-4 py-2.5 rounded-xl text-xs font-extrabold shadow-sm">Cari camilan</button>
+                    </div>`;
+            } else {
+                listContainer.innerHTML = cartItems.map(item => `
+                    <article class="cart-item-card glass-cart-card flex gap-3 items-center p-3 rounded-[22px] relative min-w-0">
+                        <div class="w-[78px] h-[78px] rounded-[17px] bg-gradient-to-br from-[#FFF7E5] to-[#EADCC4] overflow-hidden shrink-0 border border-white shadow-inner image-wrap">
+                            <img src="${item.img}" loading="lazy" decoding="async" referrerpolicy="no-referrer" class="w-full h-full object-cover" alt="${item.name}" onerror="this.style.display='none';this.parentElement.classList.add('image-fallback')">
+                        </div>
+                        <div class="flex-1 min-w-0 self-stretch flex flex-col justify-center">
+                            <h4 class="font-display font-extrabold text-[12px] text-brand-dark leading-snug">${item.name}</h4>
+                            <p class="text-[10px] font-semibold text-brand-brown/60 mt-1">${item.size} · ${item.flavor}</p>
+                            <div class="font-extrabold text-[13px] text-brand-brown mt-1.5">Rp ${(item.price * item.qty).toLocaleString('id-ID')}</div>
+                            <div class="flex items-center gap-2 mt-2">
+                                <div class="inline-flex items-center gap-3 bg-white/75 border border-white shadow-inner rounded-full px-2 py-1">
+                                    <button aria-label="Kurangi ${item.name}" onclick="updateCartItemQty(${item.id}, -1)" class="w-5 h-5 rounded-full flex items-center justify-center text-brand-brown hover:bg-brand-yellow/40 text-xs font-extrabold">−</button>
+                                    <span class="text-[11px] font-extrabold text-brand-dark min-w-[8px] text-center">${item.qty}</span>
+                                    <button aria-label="Tambah ${item.name}" onclick="updateCartItemQty(${item.id}, 1)" class="w-5 h-5 rounded-full flex items-center justify-center bg-brand-yellow text-brand-brown hover:bg-yellow-300 text-xs font-extrabold">+</button>
+                                </div>
+                            </div>
+                        </div>
+                        <button aria-label="Hapus ${item.name}" onclick="removeItem(${item.id})" class="w-8 h-8 rounded-full bg-white/70 border border-white text-red-400 hover:bg-red-50 hover:text-red-600 flex items-center justify-center self-start shrink-0 smooth-transition"><i class="fa-solid fa-trash-can text-xs"></i></button>
+                    </article>
+                `).join('');
+            }
+
+            const countLabel = document.getElementById('cartItemCountLabel');
+            if (countLabel) countLabel.innerText = `${totalCount} item`;
+            document.getElementById('cartSubtotal').innerText = `Rp ${totalAmount.toLocaleString('id-ID')}`;
+            const shippingLabel = document.getElementById('cartShipping');
+            if (shippingLabel) shippingLabel.innerText = `Rp ${shipping.toLocaleString('id-ID')}`;
+            document.getElementById('cartTotal').innerText = `Rp ${finalTotal.toLocaleString('id-ID')}`;
+            document.getElementById('cartFooterTotal').innerText = `Rp ${finalTotal.toLocaleString('id-ID')}`;
+            document.getElementById('checkoutGrandTotal').innerText = `Rp ${finalTotal.toLocaleString('id-ID')}`;
+            document.getElementById('cartDiscountValue').innerText = `-Rp ${discount.toLocaleString('id-ID')}`;
+            document.getElementById('cartDiscountRow').classList.toggle('hidden', discount === 0);
+            const badge = document.getElementById('badgeCartCount');
+            if (badge) {
+                badge.innerText = totalCount;
+                badge.classList.toggle('hidden', totalCount === 0);
+            }
+            const checkoutBtn = document.getElementById('cartCheckoutBtn');
+            if (checkoutBtn) checkoutBtn.disabled = cartItems.length === 0;
+            const promoStatus = document.getElementById('promoStatus');
+            if (promoStatus) promoStatus.classList.toggle('hidden', promoDiscount === 0);
+        }
+
+        function updateCartItemQty(id, delta) {
+            const item = cartItems.find(i => i.id === id);
+            if (!item) return;
+            item.qty += delta;
+            if (item.qty <= 0) cartItems = cartItems.filter(i => i.id !== id);
+            renderCartUI();
+        }
+
+        function removeItem(id) {
+            cartItems = cartItems.filter(i => i.id !== id);
+            renderCartUI();
+        }
+
+        function clearCart() {
+            cartItems = [];
+            promoDiscount = 0;
+            const input = document.getElementById('promoInput');
+            if (input) input.value = '';
+            renderCartUI();
+            showToast('Keranjang dikosongkan', 'Semua item sudah dihapus.');
+        }
+
+        function applyPromo() {
+            const input = document.getElementById('promoInput');
+            const val = input ? input.value.trim().toUpperCase() : '';
+            if (cartItems.length === 0) {
+                showToast('Keranjang kosong', 'Tambahkan produk sebelum memakai voucher.');
+                return;
+            }
+            if (val) {
+                promoDiscount = 10000;
+                renderCartUI();
+                showToast('Promo berhasil', 'Diskon Rp 10.000 diterapkan.');
+            } else {
+                showToast('Masukkan kode promo', 'Isi kode voucher dulu ya.');
+            }
+        }
+
+        // 6. Checkout & Tracking Logic
+        function detectGPSLocation() {
+            document.getElementById('addressText').innerText = "📍 Jl. MT Haryono No. 12, Lowokwaru, Malang (GPS)";
+            showToast('GPS', 'Lokasi otomatis diperbarui.');
+        }
+
+        function processOrder() {
+            if (cartItems.length === 0) {
+                showToast('Gagal', 'Keranjang masih kosong!');
+                return;
+            }
+            document.getElementById('invoiceNumber').innerText = `#SKS-${Math.floor(100000 + Math.random() * 900000)}`;
+            showToast('Memproses', 'Pembayaran berhasil. Menyiapkan pesanan.');
+            setInteractiveScreen(5);
+            
+            // Clear cart logic after checkout
+            cartItems = []; 
+            promoDiscount = 0;
+            renderCartUI();
+        }
+
+        // 7. Review & Reorder Logic
+        function rateStars(num) {
+            const stars = document.querySelectorAll('#starPicker span');
+            stars.forEach((s, idx) => {
+                if(idx < num) {
+                    s.classList.add('text-brand-yellow');
+                    s.classList.remove('text-gray-300');
+                } else {
+                    s.classList.remove('text-brand-yellow');
+                    s.classList.add('text-gray-300');
+                }
+            });
+        }
+
+        function submitReview() {
+            document.getElementById('reviewComment').value = '';
+            showToast('Terkirim', 'Terima kasih atas ulasan otentik Anda!');
+            rateStars(0); // Reset stars
+        }
+
+        function reorderItems() {
+            // Mock repopulating cart
+            cartItems = [
+                { id: Date.now(), name: 'Keripik Talas Pedas Manis', size: '200g', flavor: 'Pedas Manis', price: 15000, qty: 2, img: productImages.talasPedas }
+            ];
+            renderCartUI();
+            showToast('Reorder', 'Pesanan dimasukkan kembali ke keranjang.');
+            setInteractiveScreen(3);
+        }
+
+        // Global Utility
+        function showToast(title, message) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastTitle').innerText = title;
+            document.getElementById('toastMessage').innerText = message;
+
+            toast.classList.remove('-translate-y-20', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('-translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+
+        // ================= GEMINI AI CHAT LOGIC =================
+        let isAiChatOpen = false;
+        let aiChatHistory = [];
+
+        function toggleAiChat() {
+            const chatWindow = document.getElementById('aiChatWindow');
+            const fabBadge = document.querySelector('#aiChatFab span.absolute');
+            
+            // Sembunyikan badge notifikasi saat dibuka
+            if(fabBadge) fabBadge.style.display = 'none'; 
+
+            isAiChatOpen = !isAiChatOpen;
+            
+            if (isAiChatOpen) {
+                chatWindow.classList.remove('hidden');
+                // Paksa reflow agar animasi CSS jalan
+                void chatWindow.offsetWidth; 
+                chatWindow.classList.remove('translate-y-4', 'opacity-0');
+                chatWindow.classList.add('flex', 'translate-y-0', 'opacity-100');
+            } else {
+                chatWindow.classList.remove('translate-y-0', 'opacity-100');
+                chatWindow.classList.add('translate-y-4', 'opacity-0');
+                setTimeout(() => {
+                    chatWindow.classList.remove('flex');
+                    chatWindow.classList.add('hidden');
+                }, 300);
+            }
+        }
+
+        function handleAiChatEnter(e) {
+            if (e.key === 'Enter') sendAiMessage();
+        }
+
+        async function sendAiMessage() {
+            const input = document.getElementById('aiChatInput');
+            const message = input.value.trim();
+            if (!message) return;
+
+            const chatMessages = document.getElementById('aiChatMessages');
+            const sendBtn = document.getElementById('aiSendBtn');
+
+            // 1. Tambahkan pesan user ke UI
+            const userMsgHtml = `
+                <div class="flex justify-end">
+                    <div class="bg-brand-brown text-white p-3 rounded-2xl rounded-tr-sm max-w-[85%] shadow-sm text-xs font-medium">
+                        ${message}
+                    </div>
+                </div>
+            `;
+            chatMessages.insertAdjacentHTML('beforeend', userMsgHtml);
+            input.value = '';
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            // 2. Tampilkan indikator loading AI
+            const loadingId = 'loading-' + Date.now();
+            const loadingHtml = `
+                <div id="${loadingId}" class="flex justify-start">
+                    <div class="bg-white border border-gray-200 text-brand-dark p-3 rounded-2xl rounded-tl-sm shadow-sm text-xs font-medium flex gap-1 items-center">
+                        <div class="w-1.5 h-1.5 bg-brand-yellow rounded-full animate-bounce"></div>
+                        <div class="w-1.5 h-1.5 bg-brand-yellow rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+                        <div class="w-1.5 h-1.5 bg-brand-yellow rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                    </div>
+                </div>
+            `;
+            chatMessages.insertAdjacentHTML('beforeend', loadingHtml);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            // Disable input sementara
+            input.disabled = true;
+            sendBtn.disabled = true;
+            sendBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-xs"></i>';
+
+            // 3. Siapkan payload untuk Gemini API
+            aiChatHistory.push({ role: "user", parts: [{ text: message }] });
+
+            // System prompt mendefinisikan persona LLM
+            const systemPrompt = "Kamu adalah Ibu Nikamah (Asisten AI), pemilik UMKM 'Keripik Keluarga Sakinah' di Malang. Kamu ramah, keibuan, menggunakan bahasa Indonesia yang santai dengan sedikit logat Jawa Timuran/Malangan (misal: rek, sam, nduk, le, wes, monggo). Produk yang dijual: Keripik Pisang dan Keripik Talas. Varian rasa: Original Asin, Pedas Manis, Extra Pedas. Harga: Rp 15.000 - Rp 19.000. Keunggulan: bahan dari kebun sendiri, otentik, renyah, porsi melimpah. Jawab dengan singkat (1-2 paragraf pendek saja), ramah, solutif, dan selalu arahkan pelanggan untuk segera menambahkan ke keranjang dan checkout di aplikasi ini. Jangan gunakan format markdown yang rumit, gunakan plain text saja.";
+
+            const payload = {
+                contents: aiChatHistory,
+                systemInstruction: { parts: [{ text: systemPrompt }] }
+            };
+
+            const apiKey = ""; // API Key otomatis ditangani oleh environment
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+
+            try {
+                // Panggil API
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+                
+                let aiResponseText = "Waduh rek, maaf Ibu Nikamah lagi repot di dapur. Coba tanya lagi nanti ya!";
+                
+                if (result.candidates && result.candidates[0].content && result.candidates[0].content.parts[0].text) {
+                    aiResponseText = result.candidates[0].content.parts[0].text;
+                    // Simpan respon ke history percakapan
+                    aiChatHistory.push({ role: "model", parts: [{ text: aiResponseText }] });
+                }
+
+                // Hapus loading
+                document.getElementById(loadingId).remove();
+                
+                // Tambahkan pesan AI ke UI
+                const modelMsgHtml = `
+                    <div class="flex justify-start">
+                        <div class="bg-white border border-gray-200 text-brand-dark p-3 rounded-2xl rounded-tl-sm max-w-[85%] shadow-sm text-xs font-medium leading-relaxed">
+                            ${aiResponseText.replace(/\n/g, '<br>')}
+                        </div>
+                    </div>
+                `;
+                chatMessages.insertAdjacentHTML('beforeend', modelMsgHtml);
+                
+            } catch (error) {
+                console.error("Gemini API Error:", error);
+                document.getElementById(loadingId).remove();
+                const errorHtml = `
+                    <div class="flex justify-start">
+                        <div class="bg-red-50 border border-red-200 text-red-600 p-3 rounded-2xl rounded-tl-sm max-w-[85%] shadow-sm text-xs font-medium">
+                            Waduh, koneksi internet lagi bermasalah rek. Coba tanya lagi nanti ya.
+                        </div>
+                    </div>
+                `;
+                chatMessages.insertAdjacentHTML('beforeend', errorHtml);
+            } finally {
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+                input.disabled = false;
+                sendBtn.disabled = false;
+                sendBtn.innerHTML = '<i class="fa-solid fa-paper-plane text-xs"></i>';
+                input.focus();
+            }
+        }
+    </script>
+</body>
+</html>

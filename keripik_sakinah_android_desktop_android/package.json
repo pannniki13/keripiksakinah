@@ -1,0 +1,57 @@
+{
+  "name": "keripik-sakinah-desktop",
+  "version": "1.0.0",
+  "description": "Aplikasi desktop Keripik Sakinah dengan katalog yang sama dengan Android.",
+  "main": "desktop/main.js",
+  "author": "Keripik Sakinah",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "pack:win": "electron-builder --win --x64 --dir",
+    "dist:win": "electron-builder --win nsis --x64",
+    "dist:portable": "electron-builder --win portable --x64"
+  },
+  "devDependencies": {
+    "electron": "45.0.0",
+    "electron-builder": "^26.0.12"
+  },
+  "build": {
+    "appId": "com.keripiksakinah.desktop",
+    "productName": "Keripik Sakinah",
+    "directories": {
+      "output": "release",
+      "buildResources": "desktop"
+    },
+    "files": [
+      "desktop/**/*",
+      "app/src/main/assets/**/*",
+      "package.json",
+      "!**/*.map",
+      "!**/README*"
+    ],
+    "asar": true,
+    "win": {
+      "icon": "desktop/icon.ico",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Keripik Sakinah"
+    },
+    "portable": {
+      "artifactName": "Keripik-Sakinah-Portable-${version}.${ext}"
+    },
+    "artifactName": "Keripik-Sakinah-Setup-${version}.${ext}"
+  }
+}
